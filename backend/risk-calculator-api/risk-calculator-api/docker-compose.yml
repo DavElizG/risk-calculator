@@ -1,0 +1,25 @@
+services:
+  risk-calculator-api:
+    image: risk-calculator-api:latest
+    container_name: risk-calculator-backend
+    ports:
+      - "8080:80"
+      - "8443:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/api/RiskCalculator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - risk-calculator-network
+
+networks:
+  risk-calculator-network:
+    driver: bridge

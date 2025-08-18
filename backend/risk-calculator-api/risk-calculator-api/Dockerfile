@@ -1,0 +1,41 @@
+# Use the official .NET 8 SDK image for building
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
+
+# Copy csproj and restore dependencies
+COPY risk-calculator-api.csproj ./
+RUN dotnet restore
+
+# Copy everything else and build
+COPY . ./
+RUN dotnet publish risk-calculator-api.csproj -c Release -o out
+
+# Use the official .NET 8 runtime image for the final image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+
+# Install dependencies for production
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the published application
+COPY --from=build /app/out .
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+# Expose ports
+EXPOSE 80
+EXPOSE 443
+
+# Set environment variables
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:80/api/RiskCalculator/health || exit 1
+
+# Run the application
+ENTRYPOINT ["dotnet", "RiskCalculator.API.dll"]
