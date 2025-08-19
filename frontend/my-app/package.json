@@ -1,7 +1,8 @@
 {
-  "name": "risk-calculator-frontend",
+  "name": "cybersecurity-risk-calculator",
   "private": true,
   "version": "1.0.0",
+  "description": "Comprehensive cybersecurity risk assessment tool for calculating risk using THREAT × VULNERABILITY formula",
   "type": "module",
   "scripts": {
     "dev": "vite",
