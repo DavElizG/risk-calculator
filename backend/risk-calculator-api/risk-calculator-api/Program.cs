@@ -30,7 +30,8 @@ builder.Services.AddCors(options =>
                 "https://localhost:5173",
                 "http://localhost:5174",
                 "http://localhost:4173",
-                "http://localhost:8080")
+                "http://localhost:8080",
+                "https://risk-calculator-a6f2.onrender.com")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
