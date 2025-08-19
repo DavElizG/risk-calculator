@@ -30,7 +30,7 @@ EXPOSE 80
 EXPOSE 443
 
 # Set environment variables
-ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:80
 
 # Health check
