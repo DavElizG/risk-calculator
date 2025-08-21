@@ -46,7 +46,7 @@ A comprehensive cybersecurity risk assessment tool that calculates risk using th
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
+git clone <https://github.com/DavElizG/risk-calculator.git>
 cd risk-calculator
 ```
 
