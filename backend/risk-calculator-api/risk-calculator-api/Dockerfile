@@ -3,11 +3,11 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy csproj and restore dependencies
-COPY ./backend/risk-calculator-api/risk-calculator-api/risk-calculator-api.csproj ./
+COPY risk-calculator-api.csproj ./
 RUN dotnet restore
 
 # Copy everything else and build
-COPY ./backend/risk-calculator-api/risk-calculator-api/ ./
+COPY . ./
 RUN dotnet publish risk-calculator-api.csproj -c Release -o out
 
 # Use the official .NET 8 runtime image for the final image

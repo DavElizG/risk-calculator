@@ -3,6 +3,7 @@ using FluentValidation;
 using RiskCalculator.API.Services;
 using RiskCalculator.API.Models.Requests;
 using RiskCalculator.API.Models.DTOs;
+using RiskCalculator.API.Middleware;
 
 namespace RiskCalculator.API.Controllers;
 
@@ -50,6 +51,13 @@ public class RiskCalculatorController : ControllerBase
             }
 
             var result = await _riskCalculationService.CalculateRiskAsync(request);
+            
+            // Registrar métricas de negocio
+            MetricsMiddleware.RecordRiskCalculation(
+                result.RiskLevel, 
+                request.ThreatType ?? "Unknown", 
+                request.VulnerabilityCategory ?? "Unknown"
+            );
             
             _logger.LogInformation("Risk calculation completed. Risk Score: {RiskScore}, Risk Level: {RiskLevel}", 
                 result.RiskScore, result.RiskLevel);

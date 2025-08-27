@@ -4,6 +4,7 @@ using RiskCalculator.API.Validators;
 using RiskCalculator.API.Models.Requests;
 using RiskCalculator.API.Middleware;
 using Serilog;
+using Prometheus;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,6 +90,14 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Risk Calculator API v1");
     c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
 });
+
+// Add Prometheus metrics endpoint
+app.UseRouting();
+app.UseHttpMetrics(); // Built-in HTTP metrics
+app.MapMetrics(); // Expose /metrics endpoint
+
+// Add custom metrics middleware
+app.UseMiddleware<MetricsMiddleware>();
 
 // Add global exception handling middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
