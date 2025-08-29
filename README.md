@@ -1,3 +1,8 @@
+## **LINKS**
+
+- **API**: [https://risk-calculator-api.onrender.com/](https://risk-calculator-api.onrender.com/)
+- **Demo**: [https://risk-calculator-a6f2.onrender.com/](https://risk-calculator-a6f2.onrender.com/)
+
 # 🛡️ Cybersecurity Risk Assessment Calculator
 
 A comprehensive cybersecurity risk assessment tool that calculates risk using the formula: **RISK = THREAT × VULNERABILITY**
@@ -46,7 +51,7 @@ A comprehensive cybersecurity risk assessment tool that calculates risk using th
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
+git clone <https://github.com/DavElizG/risk-calculator.git>
 cd risk-calculator
 ```
 
