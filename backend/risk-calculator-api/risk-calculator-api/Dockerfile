@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy csproj and restore dependencies
 COPY risk-calculator-api.csproj ./
-RUN dotnet restore
+RUN dotnet restore risk-calculator-api.csproj
 
 # Copy everything else and build
 COPY . ./
