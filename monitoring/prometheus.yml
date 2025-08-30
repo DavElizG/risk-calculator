@@ -11,9 +11,21 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'risk-calculator-api'
+  # Local backend (para desarrollo)
+  - job_name: 'risk-calculator-api-local'
     static_configs:
       - targets: ['risk-calculator-backend:80']
     metrics_path: '/metrics'
     scrape_interval: 10s
     scrape_timeout: 5s
+
+  # Render deployment (producción)
+  - job_name: 'risk-calculator-api-render'
+    static_configs:
+      - targets: ['risk-calculator-api.onrender.com']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: https
+    tls_config:
+      insecure_skip_verify: false

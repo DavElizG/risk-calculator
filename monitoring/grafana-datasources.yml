@@ -12,3 +12,14 @@ datasources:
     jsonData:
       timeInterval: "5s"
       httpMethod: "GET"
+
+  - name: 'Risk Calculator Jaeger'
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    isDefault: false
+    editable: true
+    basicAuth: false
+    orgId: 1
+    jsonData:
+      timeInterval: "5s"
