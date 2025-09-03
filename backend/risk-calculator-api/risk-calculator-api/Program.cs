@@ -6,8 +6,10 @@ using RiskCalculator.API.Middleware;
 using Serilog;
 using Prometheus;
 using System.Reflection;
+using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,39 +20,24 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Configure OpenTelemetry
-var useTracing = Environment.GetEnvironmentVariable("ENABLE_TRACING")?.ToLower() == "true";
-if (useTracing)
-{
-    builder.Services.AddOpenTelemetry()
-        .ConfigureResource(resource => resource
-            .AddService("risk-calculator-api", "1.0.0")
-            .AddAttributes(new Dictionary<string, object>
-            {
-                ["deployment.environment"] = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
-            }))
-        .WithTracing(tracing =>
-        {
-            tracing.AddAspNetCoreInstrumentation(options =>
+// Configure OpenTelemetry (siguiendo el patrón de eShop)
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r.AddService("risk-calculator-api", "1.0.0"))
+    .WithTracing(tracing =>
+        tracing
+            .AddAspNetCoreInstrumentation(options =>
             {
                 options.RecordException = true;
                 options.Filter = (httpContext) => !httpContext.Request.Path.StartsWithSegments("/health");
             })
+            .AddHttpClientInstrumentation())
+    .WithMetrics(metrics =>
+        metrics
+            .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
-            .AddConsoleExporter();
-
-            // Solo agregar Jaeger si está configurado
-            var jaegerEndpoint = Environment.GetEnvironmentVariable("JAEGER_ENDPOINT");
-            if (!string.IsNullOrEmpty(jaegerEndpoint))
-            {
-                tracing.AddJaegerExporter(options =>
-                {
-                    options.AgentHost = Environment.GetEnvironmentVariable("JAEGER_HOST") ?? "localhost";
-                    options.AgentPort = int.Parse(Environment.GetEnvironmentVariable("JAEGER_PORT") ?? "6831");
-                });
-            }
-        });
-}
+            .AddRuntimeInstrumentation()
+            .AddProcessInstrumentation())
+    .UseOtlpExporter(); // Configuración automática desde variables de entorno
 
 // Add services to the container
 builder.Services.AddControllers();
