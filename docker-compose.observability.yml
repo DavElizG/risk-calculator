@@ -3,7 +3,9 @@ version: '3.8'
 services:
   # Backend API
   risk-calculator-backend:
-    image: risk-calculator-api:latest
+    build:
+      context: ./backend/risk-calculator-api/risk-calculator-api
+      dockerfile: Dockerfile
     container_name: risk-calculator-backend
     ports:
       - "8080:80"
