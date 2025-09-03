@@ -20,7 +20,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Configure OpenTelemetry (siguiendo el patrón de eShop)
+// Configure OpenTelemetry (usando endpoint OTLP unificado de Grafana Cloud)
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(r => r.AddService("risk-calculator-api", "1.0.0"))
     .WithTracing(tracing =>
@@ -37,7 +37,7 @@ builder.Services.AddOpenTelemetry()
             .AddHttpClientInstrumentation()
             .AddRuntimeInstrumentation()
             .AddProcessInstrumentation())
-    .UseOtlpExporter(); // Configuración automática desde variables de entorno
+    .UseOtlpExporter(); // Endpoint unificado de Grafana Cloud
 
 // Add services to the container
 builder.Services.AddControllers();

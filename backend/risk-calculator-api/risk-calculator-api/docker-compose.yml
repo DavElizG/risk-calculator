@@ -8,6 +8,14 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      # OpenTelemetry configuration for local development (optional)
+      # Uncomment below lines to test OTLP export locally
+      # - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      # - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+      # For Grafana Cloud (production), use these instead:
+      # - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      # - OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp-gateway-prod-us-east-2.grafana.net/otlp
+      # - OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic [your-token]
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped
