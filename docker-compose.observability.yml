@@ -11,9 +11,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      # OpenTelemetry configuration (siguiendo patrón eShop)
+      # OpenTelemetry configuration para dual export (local + cloud)
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      # Grafana Cloud configuration (for dual export)
+      - GRAFANA_CLOUD_OTLP_ENDPOINT=https://otlp-gateway-prod-us-east-2.grafana.net/otlp
+      - GRAFANA_CLOUD_OTLP_HEADERS=Authorization=Basic Z2xjX2V5SnZJam9pTVRVeE5qVTRNaUlzSW01SmRXNTJiaUVzSW10NmFXNHhOR0VzSW5ZaWFYQm9iakpGYW5SeU0yVktUV0ZzU25KVFRFNVVOVlF6VGpSelVXa3JZa3A1TjBSWGRVTkpNRGxaUzFOTWJTSXNJbTFpYVhSeVgzSjFiblJwYldVNmFYUTZleUpoWldWaFpqSTJPUzAyWm1abUxUUXhaRGd0T0dGbU15MW1OR1l3TWpOa05ETTVNMlU5Vm1sc1lYZ3lSSFl6YWsxM01sWmhOVmcwTWs0aWZYMCUzRA
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped

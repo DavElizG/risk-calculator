@@ -10,6 +10,7 @@ using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,24 +21,53 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Configure OpenTelemetry (usando endpoint OTLP unificado de Grafana Cloud)
+// Configure OpenTelemetry (dual export: local Tempo + Grafana Cloud)
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(r => r.AddService("risk-calculator-api", "1.0.0"))
     .WithTracing(tracing =>
+    {
         tracing
             .AddAspNetCoreInstrumentation(options =>
             {
                 options.RecordException = true;
                 options.Filter = (httpContext) => !httpContext.Request.Path.StartsWithSegments("/health");
             })
-            .AddHttpClientInstrumentation())
+            .AddHttpClientInstrumentation();
+        
+        // Export to local Tempo (when running locally)
+        if (builder.Environment.IsDevelopment())
+        {
+            tracing.AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri("http://tempo:4317");
+                options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
+        }
+        
+        // Export to Grafana Cloud (always, configured via environment variables)
+        tracing.AddOtlpExporter();
+    })
     .WithMetrics(metrics =>
+    {
         metrics
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddRuntimeInstrumentation()
-            .AddProcessInstrumentation())
-    .UseOtlpExporter(); // Endpoint unificado de Grafana Cloud
+            .AddProcessInstrumentation();
+        
+        // Export to local Tempo (when running locally)
+        if (builder.Environment.IsDevelopment())
+        {
+            metrics.AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri("http://tempo:4317");
+                options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
+        }
+        
+        // Export to Grafana Cloud (always, configured via environment variables)
+        metrics.AddOtlpExporter();
+    });
 
 // Add services to the container
 builder.Services.AddControllers();
