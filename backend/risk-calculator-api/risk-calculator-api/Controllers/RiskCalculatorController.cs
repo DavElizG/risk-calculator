@@ -287,4 +287,128 @@ public class RiskCalculatorController : ControllerBase
             }
         });
     }
+
+    /// <summary>
+    /// Test endpoint to generate 400 errors for observability testing
+    /// </summary>
+    [HttpGet("test/error/400")]
+    public ActionResult<ApiResponseDto<object>> TestBadRequest()
+    {
+        _logger.LogWarning("Test endpoint called - generating 400 Bad Request error");
+        return BadRequest(new ApiResponseDto<object>
+        {
+            Success = false,
+            Errors = new List<string> { "This is an intentional 400 error for testing observability" },
+            Message = "Bad Request Test"
+        });
+    }
+
+    /// <summary>
+    /// Test endpoint to generate 404 errors for observability testing
+    /// </summary>
+    [HttpGet("test/error/404")]
+    public ActionResult<ApiResponseDto<object>> TestNotFound()
+    {
+        _logger.LogWarning("Test endpoint called - generating 404 Not Found error");
+        return NotFound(new ApiResponseDto<object>
+        {
+            Success = false,
+            Errors = new List<string> { "This is an intentional 404 error for testing observability" },
+            Message = "Not Found Test"
+        });
+    }
+
+    /// <summary>
+    /// Test endpoint to generate 500 errors for observability testing
+    /// </summary>
+    [HttpGet("test/error/500")]
+    public ActionResult<ApiResponseDto<object>> TestInternalServerError()
+    {
+        _logger.LogError("Test endpoint called - generating 500 Internal Server Error");
+        throw new Exception("This is an intentional 500 error for testing observability and distributed tracing");
+    }
+
+    /// <summary>
+    /// Test endpoint with slow response for latency testing
+    /// </summary>
+    [HttpGet("test/slow")]
+    public async Task<ActionResult<ApiResponseDto<object>>> TestSlowResponse()
+    {
+        _logger.LogInformation("Test slow endpoint called - simulating slow response");
+        
+        var random = new Random();
+        var delay = random.Next(2000, 5000); // 2-5 seconds delay
+        
+        await Task.Delay(delay);
+        
+        _logger.LogInformation("Slow response completed after {Delay}ms", delay);
+        
+        return Ok(new ApiResponseDto<object>
+        {
+            Success = true,
+            Data = new
+            {
+                Message = "Slow response completed",
+                DelayMs = delay,
+                Timestamp = DateTime.UtcNow
+            }
+        });
+    }
+
+    /// <summary>
+    /// Test endpoint to generate multiple risk calculations for metrics
+    /// </summary>
+    [HttpGet("test/bulk-calculations")]
+    public async Task<ActionResult<ApiResponseDto<List<object>>>> TestBulkCalculations()
+    {
+        _logger.LogInformation("Test bulk calculations endpoint called");
+        
+        var results = new List<object>();
+        var threatTypes = new[] { "Malware", "Phishing", "Data Breach", "SQL Injection", "DDoS" };
+        var vulnerabilityCategories = new[] { "Critical", "High", "Medium", "Low" };
+        var random = new Random();
+
+        for (int i = 0; i < 10; i++)
+        {
+            var threatType = threatTypes[random.Next(threatTypes.Length)];
+            var vulnCategory = vulnerabilityCategories[random.Next(vulnerabilityCategories.Length)];
+            var threatLevel = random.Next(1, 6);
+            var vulnLevel = random.Next(1, 6);
+
+            // Simulate a calculation
+            var riskScore = threatLevel * vulnLevel;
+            var riskLevel = riskScore switch
+            {
+                >= 20 => "Critical",
+                >= 15 => "High", 
+                >= 10 => "Medium",
+                >= 5 => "Low",
+                _ => "Minimal"
+            };
+
+            // Record metrics
+            MetricsMiddleware.RecordRiskCalculation(riskLevel, threatType, vulnCategory);
+
+            results.Add(new
+            {
+                ThreatType = threatType,
+                VulnerabilityCategory = vulnCategory,
+                ThreatLevel = threatLevel,
+                VulnerabilityLevel = vulnLevel,
+                RiskScore = riskScore,
+                RiskLevel = riskLevel
+            });
+
+            // Small delay to spread out the metrics
+            await Task.Delay(100);
+        }
+
+        _logger.LogInformation("Generated {Count} test calculations", results.Count);
+
+        return Ok(new ApiResponseDto<List<object>>
+        {
+            Success = true,
+            Data = results
+        });
+    }
 }
